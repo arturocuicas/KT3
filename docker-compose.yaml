@@ -1,0 +1,45 @@
+services:
+    api:
+        container_name: api
+        build:
+            context: ./api
+            dockerfile: Dockerfile
+        env_file: api/.env
+        volumes:
+            - ./api:/home/api
+        ports:
+            - '7000:7000'
+        networks:
+            - kt3-net
+
+    postgres:
+        container_name: postgres
+        image: postgres:16-alpine3.19
+        restart: on-failure
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+        ports:
+            - '5432:5432'
+        volumes:
+            - db-postgres:/var/lib/postgresql/data
+        networks:
+            - kt3-net
+
+    liquibase:
+        container_name: liquibase-kt3
+        build:
+            context: ./liquibase
+            dockerfile: Dockerfile
+        env_file: liquibase/.env
+        entrypoint: "liquibase update --log-level info"
+        networks:
+            - kt3-net
+
+volumes:
+    db-postgres:
+        driver: local
+        
+networks:
+    kt3-net:
+        external: true

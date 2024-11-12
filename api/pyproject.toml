@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "kt3"
+version = "0.1.0"
+description = "KT3 API"
+authors = ["Arturo Cuicas <arturo.cuicas@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.115.0"
+pydantic = "^2.9.2"
+pydantic-settings = "^2.5.2"
+uvicorn = "^0.31.0"
+python-dotenv = "^1.0.1"
+sqlalchemy = "^2.0.35"
+sqlmodel = "^0.0.22"
+psycopg2-binary = "^2.9.9"
+asyncpg = "^0.29.0"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.8.0"
+isort = "^5.13.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
