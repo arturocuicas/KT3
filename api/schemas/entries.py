@@ -25,5 +25,6 @@ class EntryRead(BaseModel):
     date_period: date
     amount: Decimal
     account_id: UUID
+    account_name: str
     created_at: datetime
     updated_at: datetime

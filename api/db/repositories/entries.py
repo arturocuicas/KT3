@@ -1,9 +1,10 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from sqlmodel import select
+from sqlmodel import select, func
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from db.tables.accounts import Account
 from db.tables.entries import Entry
 from schemas.entries import EntryCreate, EntryRead
 
@@ -32,7 +33,18 @@ class EntryRepository:
         await self.session.commit()
         await self.session.refresh(db_entry)
 
-        return EntryRead(**db_entry.dict())
+        account = await self.session.get(Account, db_entry.account_id)
+
+        return EntryRead(
+            id=db_entry.id,
+            description=db_entry.description,
+            date_period=db_entry.date_period,
+            amount=db_entry.amount,
+            account_id=db_entry.account_id,
+            account_name=account.name,
+            created_at=db_entry.created_at,
+            updated_at=db_entry.updated_at,
+        )
 
     async def get(self, entry_id: UUID):
         db_entry = await self._get_instance(entry_id)
@@ -40,11 +52,39 @@ class EntryRepository:
         if not db_entry:
             return None
 
-        return EntryRead(**db_entry.dict())
+        account = await self.session.get(Account, db_entry.account_id)
+
+        return EntryRead(
+            id=db_entry.id,
+            description=db_entry.description,
+            date_period=db_entry.date_period,
+            amount=db_entry.amount,
+            account_id=db_entry.account_id,
+            account_name=account.name,
+            created_at=db_entry.created_at,
+            updated_at=db_entry.updated_at,
+        )
 
     async def list(self):
         statement = select(Entry)
         results = await self.session.exec(statement)
-        entries_list = [EntryRead(**entry.dict()) for entry in results.all()]
+        entries_list = [entry for entry in results.all()]
+        account_ids = set([entry.account_id for entry in entries_list])
 
-        return entries_list
+        statement = select(Account).where(Account.id.in_(account_ids))
+        results = await self.session.exec(statement)
+        accounts = {account.id: account for account in results.all()}
+
+        return [
+            EntryRead(
+                id=entry.id,
+                description=entry.description,
+                date_period=entry.date_period,
+                amount=entry.amount,
+                account_id=entry.account_id,
+                account_name=accounts[entry.account_id].name,
+                created_at=entry.created_at,
+                updated_at=entry.updated_at,
+            )
+            for entry in entries_list
+        ]

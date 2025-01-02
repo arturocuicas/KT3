@@ -1,45 +1,61 @@
 services:
-    api:
-        container_name: api
-        build:
-            context: ./api
-            dockerfile: Dockerfile
-        env_file: api/.env
-        volumes:
-            - ./api:/home/api
-        ports:
-            - '7000:7000'
-        networks:
-            - kt3-net
+  app:
+    container_name: app
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    env_file: app/.env
+    volumes:
+      - ./app:/home/app
+      - /app/node_modules
+    command: "npm run dev"
+    environment:
+      - NODE_ENV=development
+    ports:
+      - '3000:3000'
+    networks:
+      - kt3-net
+  api:
+    container_name: api
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    env_file: api/.env
+    volumes:
+      - ./api:/home/api
+    ports:
+      - '7000:7000'
+    networks:
+      - kt3-net
 
-    postgres:
-        container_name: postgres
-        image: postgres:16-alpine3.19
-        restart: on-failure
-        environment:
-            - POSTGRES_USER=postgres
-            - POSTGRES_PASSWORD=postgres
-        ports:
-            - '5432:5432'
-        volumes:
-            - db-postgres:/var/lib/postgresql/data
-        networks:
-            - kt3-net
+  postgres:
+    container_name: postgres
+    image: postgres:16-alpine3.19
+    restart: on-failure
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - db-postgres:/var/lib/postgresql/data
+    networks:
+      - kt3-net
 
-    liquibase:
-        container_name: liquibase-kt3
-        build:
-            context: ./liquibase
-            dockerfile: Dockerfile
-        env_file: liquibase/.env
-        entrypoint: "liquibase update --log-level info"
-        networks:
-            - kt3-net
+  liquibase:
+    container_name: liquibase-kt3
+    build:
+      context: ./liquibase
+      dockerfile: Dockerfile
+    env_file: liquibase/.env
+    entrypoint: "liquibase update --log-level info"
+    networks:
+      - kt3-net
 
 volumes:
-    db-postgres:
-        driver: local
-        
+  db-postgres:
+    driver: local
+
 networks:
-    kt3-net:
-        external: true
+  kt3-net:
+    external: true

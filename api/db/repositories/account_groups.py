@@ -5,7 +5,7 @@ from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from db.tables.account_groups import AccountGroup
-from schemas.account_groups import AccountGroupCreate, AccountGroupRead, AccountGroupUpdate
+from schemas.account_groups import AccountGroupCreate, AccountGroupRead
 
 
 class AccountGroupRepository:
@@ -42,6 +42,8 @@ class AccountGroupRepository:
     async def list(self):
         statement = select(AccountGroup)
         results = await self.session.exec(statement)
-        account_groups_list = [AccountGroupRead(**account_groups.dict()) for account_groups in results.all()]
 
-        return account_groups_list
+        return [
+            AccountGroupRead(**account_groups.dict())
+            for account_groups in results.all()
+        ]

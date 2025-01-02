@@ -21,5 +21,6 @@ class AccountRead(BaseModel):
     code: int
     name: str
     account_group_id: UUID
+    account_group_name: str
     created_at: datetime
     updated_at: datetime
